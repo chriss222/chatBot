@@ -23,3 +23,14 @@ html, body {
 .MuiOutlinedInput-notchedOutline {
   border-color: white!important;
 }
+.rotate {
+  animation: rotate 8s infinite linear;
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}

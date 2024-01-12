@@ -1,11 +1,12 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Avatar, Box, Typography, Button, IconButton } from '@mui/material'
 import { useAuth } from '../context/AuthContext'
 import { red } from '@mui/material/colors';
 import ChatBox from '../components/chat/ChatBox';
 import { IoMdSend } from 'react-icons/io';
-import { getUserChats, sendChatRequest } from '../helpers/api-communicator';
+import { deleteUserChats, getUserChats, sendChatRequest } from '../helpers/api-communicator';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 type Message = {
   role: "user" | "assistant",
@@ -13,6 +14,7 @@ type Message = {
 }
 
 const Chat = () => {
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
@@ -35,7 +37,14 @@ const Chat = () => {
   }
 
   const handleDelete = async () => {
-    
+    try {
+      toast.loading("Deleting chat history", { id: "deleteChats" });
+      await deleteUserChats();
+      setChatMessages([]);
+      toast.loading("Success", { id: "deleteChats" });
+    } catch (error) {
+      toast.error("Failed to delete chat history", { id: "deleteChats" });
+    }
   }
 
   useLayoutEffect(() => {
@@ -48,6 +57,12 @@ const Chat = () => {
         console.log(error);
         toast.error("Failed to load chats", { id: "loadChats" })
       })
+    }
+  }, [auth])
+
+  useEffect(() => {
+    if (!auth?.user) {
+      return navigate("./login")
     }
   }, [auth])
 
@@ -113,6 +128,7 @@ const Chat = () => {
               You can ask questions related to Knowlegdge, Business, Adices, Education etc. But avoid sharing personal information
             </Typography>
             <Button
+              onClick={handleDelete}
               sx={{
                 width: '200px',
                 my: 'auto',
@@ -159,6 +175,7 @@ const Chat = () => {
             flexDirection: 'column',
             overflow: 'scroll',
             overflowX: 'hidden',
+            overflowY: 'auto',
             scrollBehavior: 'smooth'
           }}
         >
@@ -187,7 +204,6 @@ const Chat = () => {
         <div 
           style={{
             width: '100%',
-            padding: '20px',
             borderRadius: '8px',
             backgroundColor: 'rgb(17, 27, 39)',
             display: 'flex',
@@ -199,7 +215,7 @@ const Chat = () => {
             style={{
               width: '100%',
               backgroundColor: 'transparent',
-              padding: '10px',
+              padding: '30px',
               border: 'none',
               outline: 'none',
               color: 'white',
@@ -209,7 +225,7 @@ const Chat = () => {
           />
           <IconButton 
             sx={{
-              ml: 'auto',
+              mx: 1,
               color: 'white'
             }}
             onClick={handleSubmit}

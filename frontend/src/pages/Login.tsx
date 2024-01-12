@@ -1,12 +1,20 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Box, Typography, Button } from '@mui/material'
 import CustomInput from '../components/shared/CustomInput'
 import { IoIosLogIn } from 'react-icons/io'
 import { useAuth } from '../context/AuthContext'
 import { toast } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
   const auth = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (auth?.user) {
+      return navigate("/chat")
+    }
+  }, [auth])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

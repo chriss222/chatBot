@@ -128,3 +128,32 @@ export const verifyUser = async (
     return res.status(200).json({ message: "ERROR", cause: error.message });
   }
 };
+
+export const userLogout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await User.findById(res.locals.jwtData.id);
+
+    if (!user) return res.status(401).send("User not registered or token malfunctioned");
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permissions not matching");
+    }
+
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      domain: "localhost",
+      signed: true,
+      path: "/"
+    });
+
+    return res
+      .status(200)
+      .json({ message: "OK", name: user.name, email: user.email });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ message: "ERROR", cause: error.message });
+  }
+};
